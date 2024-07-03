@@ -17,8 +17,12 @@ public class Player : MonoBehaviour
     private float dashSpeed = 15;
     [SerializeField]
     private float dashDuration;
-    [SerializeField]
+    //³å´Ì¼ÆÊ±Æ÷
     private float dashTime;
+    //³å´ÌÀäÈ´Ê±¼ä
+    private float dashCooldownTime =2;
+
+    private bool isOnCooldown=true;
     //[SerializeField]
     private float xInput;
     
@@ -48,7 +52,7 @@ public class Player : MonoBehaviour
         Movement();
         ChackInput();
         dashTime -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift))
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnCooldown)
         {
             dashTime = dashDuration;
         }
@@ -74,7 +78,8 @@ public class Player : MonoBehaviour
     {
         if (dashTime > 0)
         {
-            rb.velocity = new Vector2(xInput * dashSpeed, 0);
+            rb.velocity = new Vector2(1 * dashSpeed, 0);
+            StartCoroutine(DashCooldown());
         }
         else
         {
@@ -97,6 +102,7 @@ public class Player : MonoBehaviour
         anim.SetBool("isMoving", isMoving);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetBool("isDashing", dashTime > 0);
+        
     }
 
     private void Flip()
@@ -115,6 +121,13 @@ public class Player : MonoBehaviour
         {
             Flip();
         }
+    }
+
+    IEnumerator DashCooldown()
+    {
+        isOnCooldown = false;
+        yield return new WaitForSeconds(dashCooldownTime);
+        isOnCooldown = true;
     }
 
     private void OnDrawGizmos()
