@@ -2,84 +2,116 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : MonoBehaviour
+public class Player : Entity
 {
-    //角色动画控制器
-    public Animator anim;
-    //物理组件
-    private Rigidbody2D rb;
+    [Header("Move Info")]
     [SerializeField]
     private float moveSpeed = 7;
     [SerializeField]
     private float jumpForm =12;
-    [Header("Dash info")]
+    //[SerializeField]
+    private float xInput;
+    [Header("Dash Info")]
     [SerializeField]
     private float dashSpeed = 15;
     [SerializeField]
     private float dashDuration;
     //冲刺计时器
     private float dashTime;
-    //冲刺冷却时间
-    private float dashCooldownTime =2;
+    //冲刺冷却时间计时器
+    private float dashCooldownTimer;
+    //冲刺冷却
+    [SerializeField]
+    private float dashCooldown = 2;
 
     private bool isOnCooldown=true;
-    //[SerializeField]
-    private float xInput;
-    
-    private int facingDir = 1;
-    
-    private bool facingRight = true;
+    [Header("Attack Info")]
+    private bool isAttacking;
 
-    private bool isGrounded;
-    [Header("Collision Info")]
+    private int comboCounter;
     [SerializeField]
-    private float groundCheckDistance;
+    private float comboTimeCounter;
     [SerializeField]
-    private LayerMask whatIsGround;
- 
-    
-    // Start is called before the first frame update
-    void Start()
+    private float comboTime =0.3f;
+
+    protected override void Start()
     {
-        rb = GetComponent<Rigidbody2D>();
-        anim = GetComponentInChildren<Animator>();
-        whatIsGround = LayerMask.GetMask("Ground");
-    }
+        base.Start();
+
+    }   
+    // Start is called before the first frame update
+    //void  Start()
+    //{
+
+    //    //rb = GetComponent<Rigidbody2D>();
+    //    //anim = GetComponentInChildren<Animator>();
+    //    whatIsGround = LayerMask.GetMask("Ground");
+    //}
 
     // Update is called once per frame
-    void Update()
+    protected override void Update()
     {
+        base.Update();
         Movement();
         ChackInput();
-        dashTime -= Time.deltaTime;
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnCooldown)
-        {
-            dashTime = dashDuration;
-        }
-        CollisionChecks();
+        //CollisionChecks();
         AnimatorController();
+        dashTime -= Time.deltaTime;
+        dashCooldownTimer -= Time.deltaTime;
+        comboTimeCounter -= Time.deltaTime;
     }
 
-    private void CollisionChecks()
-    {
-        isGrounded = Physics2D.Raycast(transform.position, Vector2.down, groundCheckDistance, whatIsGround);
-    }
 
     private void ChackInput()
     {
+
+        if (Input.GetKeyDown(KeyCode.X))
+        {
+            StartAttackEvent();
+        }
+
+        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnCooldown&&!isAttacking)
+        {
+            if (dashCooldownTimer<0&&!isAttacking)
+            {
+                dashCooldownTimer = dashCooldown;
+                dashTime = dashDuration;
+            }
+        }
         xInput = Input.GetAxis("Horizontal");
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.C))
         {
             Jump();
         }
     }
+    /// <summary>
+    /// 攻击事件
+    /// </summary>
+    private void StartAttackEvent()
+    {
+        if (!isGrounded) 
+        {
+            return;
+        };
+        if (comboTimeCounter < 0)
+        {
+            comboCounter = 0;
+        }
+        isAttacking = true;
+        //在comboTime时间内键入攻击状态向下变化，否则攻击状态归0
+        comboTimeCounter = comboTime;
+    }
 
     private void Movement()
     {
-        if (dashTime > 0)
+        if (isAttacking)
         {
-            rb.velocity = new Vector2(1 * dashSpeed, 0);
-            StartCoroutine(DashCooldown());
+            rb.velocity = Vector2.zero;
+        }
+        else if (dashTime > 0)
+        {
+            rb.velocity = new Vector2(facingDir * dashSpeed, 0);
+           // StartCoroutine(DashCooldown());
         }
         else
         {
@@ -102,14 +134,10 @@ public class Player : MonoBehaviour
         anim.SetBool("isMoving", isMoving);
         anim.SetBool("isGrounded", isGrounded);
         anim.SetBool("isDashing", dashTime > 0);
-        
-    }
+        anim.SetBool("isAttacking", isAttacking);
+        anim.SetInteger("comboCounter", comboCounter);
 
-    private void Flip()
-    {
-        facingDir = facingDir * -1;
-        facingRight = !facingRight;
-        transform.Rotate(0, 180, 0);
+
     }
 
     private void FlipController()
@@ -122,16 +150,23 @@ public class Player : MonoBehaviour
             Flip();
         }
     }
-
-    IEnumerator DashCooldown()
+    public void AttackOver()
     {
-        isOnCooldown = false;
-        yield return new WaitForSeconds(dashCooldownTime);
-        isOnCooldown = true;
+        isAttacking = false;
+        comboCounter++;
+        if (comboCounter > 2)
+        {
+            comboCounter = 0;
+        }
     }
 
-    private void OnDrawGizmos()
-    {
-        Gizmos.DrawLine(transform.position, new Vector3(transform.position.x,transform.position.y-groundCheckDistance));
-    }
+
+    //IEnumerator DashCooldown()
+    //{
+    //    isOnCooldown = false;
+    //    yield return new WaitForSeconds(dashCooldownTimer);
+    //    isOnCooldown = true;
+    //}
+
+
 }
