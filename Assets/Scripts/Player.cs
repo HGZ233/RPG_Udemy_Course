@@ -2,171 +2,155 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Player : Entity
+
+
+public class Player : MonoBehaviour
 {
+    [Header("Attack details")]
+    public Vector2[] attackMovement;
+    public bool isBusy { get; private set; }
     [Header("Move Info")]
-    [SerializeField]
-    private float moveSpeed = 7;
-    [SerializeField]
-    private float jumpForm =12;
-    //[SerializeField]
-    private float xInput;
+    public float moveSpeed;
+    public float jumpForce;
     [Header("Dash Info")]
+    public float dashSpeed;
+    public float dashDurasion;
+    public float dashColdDown;
     [SerializeField]
-    private float dashSpeed = 15;
-    [SerializeField]
-    private float dashDuration;
-    //冲刺计时器
-    private float dashTime;
-    //冲刺冷却时间计时器
-    private float dashCooldownTimer;
-    //冲刺冷却
-    [SerializeField]
-    private float dashCooldown = 2;
+    private float dashUsageTimer;
 
-    private bool isOnCooldown=true;
-    [Header("Attack Info")]
-    private bool isAttacking;
+    public float dashDir { get; private set; }
 
-    private int comboCounter;
-    [SerializeField]
-    private float comboTimeCounter;
-    [SerializeField]
-    private float comboTime =0.3f;
 
-    protected override void Start()
+
+
+    [Header("Coilision info")]
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private float groundChecKDistance;
+    [SerializeField] private Transform wallCheck;
+    [SerializeField] private float wallChecKDistance;
+    [SerializeField] private LayerMask whatIsGround;
+
+    public int facingDir { get; private set; } = 1;
+    private bool facingRight = true;
+
+    #region Components
+    public Animator anim { get; private set; }
+
+    public Rigidbody2D rb { get; private set; }
+    #endregion
+    #region States
+    public PlayerStateMachine stateMachine { get; private set; }
+
+    public PlayerIdleState idleState { get; private set; }
+
+    public PlayerMoveState moveState { get; private set; }
+    public PlayerJumpState jumpState { get; private set; }
+    public PlayerAirState airState { get; private set; }
+    public PlayerDashState dashState { get; private set; }
+    public PlayerWallSildeState wallSildeState { get; private set; }
+    public PlayerWallJumpState wallJumpState { get; private set; }
+    public PlayerPrimaryAttackState primaryAttackState { get; private set; }
+
+    #endregion
+    private void Awake()
     {
-        base.Start();
+        stateMachine = new PlayerStateMachine();
+        idleState = new PlayerIdleState(this, stateMachine, "Idle");
+        moveState = new PlayerMoveState(this, stateMachine, "Move");
+        jumpState = new PlayerJumpState(this, stateMachine, "Jump");
+        airState = new PlayerAirState(this, stateMachine, "Jump");
+        dashState = new PlayerDashState(this, stateMachine, "Dash");
+        wallSildeState = new PlayerWallSildeState(this, stateMachine, "WallSilde");
+        wallJumpState = new PlayerWallJumpState(this, stateMachine, "Jump");
+        primaryAttackState = new PlayerPrimaryAttackState(this, stateMachine, "Attack");
 
-    }   
-    // Start is called before the first frame update
-    //void  Start()
-    //{
-
-    //    //rb = GetComponent<Rigidbody2D>();
-    //    //anim = GetComponentInChildren<Animator>();
-    //    whatIsGround = LayerMask.GetMask("Ground");
-    //}
-
-    // Update is called once per frame
-    protected override void Update()
-    {
-        base.Update();
-        Movement();
-        ChackInput();
-        //CollisionChecks();
-        AnimatorController();
-        dashTime -= Time.deltaTime;
-        dashCooldownTimer -= Time.deltaTime;
-        comboTimeCounter -= Time.deltaTime;
     }
 
-
-    private void ChackInput()
+    private void Start()
     {
+        anim = GetComponentInChildren<Animator>();
+        rb = GetComponent<Rigidbody2D>();
+        stateMachine.Initialized(idleState);
+    }
 
-        if (Input.GetKeyDown(KeyCode.X))
-        {
-            StartAttackEvent();
-        }
+    private void Update()
+    {
+        stateMachine.currentState.Update();
+        CheckForDashInput();
 
-        if (Input.GetKeyDown(KeyCode.LeftShift) && isOnCooldown&&!isAttacking)
+    }
+    private void CheckForDashInput()
+    {
+        dashUsageTimer -= Time.deltaTime;
+        if (Input.GetKeyDown(KeyCode.LeftShift) && dashUsageTimer < 0)
         {
-            if (dashCooldownTimer<0&&!isAttacking)
+            dashUsageTimer = dashColdDown;
+            //优化闪避功能，防止出现先按闪避而导致无法控制闪避方向的问题
+            dashDir = Input.GetAxisRaw("Horizontal");
+            if (dashDir == 0)
             {
-                dashCooldownTimer = dashCooldown;
-                dashTime = dashDuration;
+                dashDir = facingDir;
             }
+            stateMachine.ChangeState(dashState);
         }
-        xInput = Input.GetAxis("Horizontal");
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            Jump();
-        }
-    }
-    /// <summary>
-    /// 攻击事件
-    /// </summary>
-    private void StartAttackEvent()
-    {
-        if (!isGrounded) 
+        //滑墙状态不允许冲刺
+        if (IsWallDetected())
         {
             return;
-        };
-        if (comboTimeCounter < 0)
-        {
-            comboCounter = 0;
-        }
-        isAttacking = true;
-        //在comboTime时间内键入攻击状态向下变化，否则攻击状态归0
-        comboTimeCounter = comboTime;
-    }
-
-    private void Movement()
-    {
-        if (isAttacking)
-        {
-            rb.velocity = Vector2.zero;
-        }
-        else if (dashTime > 0)
-        {
-            rb.velocity = new Vector2(facingDir * dashSpeed, 0);
-           // StartCoroutine(DashCooldown());
-        }
-        else
-        {
-            rb.velocity = new Vector2(xInput * moveSpeed, rb.velocity.y);
-        }
-        FlipController();
-    }
-
-    private void Jump()
-    {
-        if (isGrounded)
-        {
-            rb.velocity = new Vector2(xInput * moveSpeed, jumpForm);
         }
     }
-    private void AnimatorController()
+    public IEnumerator BusyFor(float _seconds)
     {
-       bool isMoving = rb.velocity.x != 0;
-        anim.SetFloat("yVelocity", rb.velocity.y);
-        anim.SetBool("isMoving", isMoving);
-        anim.SetBool("isGrounded", isGrounded);
-        anim.SetBool("isDashing", dashTime > 0);
-        anim.SetBool("isAttacking", isAttacking);
-        anim.SetInteger("comboCounter", comboCounter);
-
-
+        isBusy = true;
+        yield return new WaitForSeconds(_seconds);
+        isBusy = false;
     }
 
-    private void FlipController()
+    public void AnimationTrigger() => stateMachine.currentState.AnimationFinishTrigger();
+
+    #region Velocity
+    public void ZeroVelocity()
     {
-        if (rb.velocity.x > 0 && !facingRight)
+        rb.velocity = new Vector2(0, 0);
+    }
+
+    public void SetVelocity(float xVelocity, float yVelocity)
+    {
+        rb.velocity = new Vector2(xVelocity, yVelocity);
+        FlipController(xVelocity);
+    }
+    #endregion
+
+    #region Flip
+    public void Flip()
+    {
+        facingDir = facingDir * -1;
+        facingRight = !facingRight;
+        transform.Rotate(0, 180, 0);
+    }
+
+    public void FlipController(float _x)
+    {
+        if (_x > 0 && !facingRight)
         {
             Flip();
-        }else if(rb.velocity.x < 0 && facingRight)
+        }
+        else if (_x < 0 && facingRight)
         {
             Flip();
         }
     }
-    public void AttackOver()
+    #endregion
+
+    #region Collision
+    public bool IsGroundDetected() => Physics2D.Raycast(groundCheck.position, Vector2.down, groundChecKDistance, whatIsGround);
+    public bool IsWallDetected() => Physics2D.Raycast(wallCheck.position, Vector2.right * facingDir, wallChecKDistance, whatIsGround);
+
+    private void OnDrawGizmos()
     {
-        isAttacking = false;
-        comboCounter++;
-        if (comboCounter > 2)
-        {
-            comboCounter = 0;
-        }
+        Gizmos.DrawLine(groundCheck.position, new Vector3(groundCheck.position.x, groundCheck.position.y - groundChecKDistance));
+        Gizmos.DrawLine(wallCheck.position, new Vector3(wallCheck.position.x + wallChecKDistance, wallCheck.position.y));
     }
-
-
-    //IEnumerator DashCooldown()
-    //{
-    //    isOnCooldown = false;
-    //    yield return new WaitForSeconds(dashCooldownTimer);
-    //    isOnCooldown = true;
-    //}
-
-
+    #endregion
 }
