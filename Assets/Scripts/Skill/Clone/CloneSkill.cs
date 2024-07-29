@@ -10,10 +10,10 @@ public class CloneSkill : MonoBehaviour
     [Space]
     [SerializeField] private bool canAttack;
 
-    public void CreateClone(Transform _clonePosation)
+    public void CreateClone(Transform _clonePosation,Vector3 _offset)
     {
         GameObject newClone = Instantiate(clonePrefab);
-        newClone.GetComponent<CloneSkillController>().SetupClone(_clonePosation,cloneDuration, canAttack);
+        newClone.GetComponent<CloneSkillController>().SetupClone(_clonePosation,cloneDuration, canAttack, _offset);
        
     }
 }

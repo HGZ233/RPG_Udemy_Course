@@ -12,7 +12,7 @@ public class PlayerDashState : PlayerState
     {
         base.Enter();
         stateTimer = player.dashDurasion;
-        SkillManage.instance.clone.CreateClone(player.transform);
+        SkillManage.instance.clone.CreateClone(player.transform,Vector3.zero);
 
     }
 
