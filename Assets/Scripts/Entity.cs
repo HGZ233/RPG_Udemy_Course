@@ -21,8 +21,8 @@ public class Entity : MonoBehaviour
     #region Components
     public Animator anim { get; private set; }
     public Rigidbody2D rb { get; private set; }
-
     public EntityFX fx { get; private set; }
+    public SpriteRenderer sr { get; private set; }
     #endregion
 
     public int facingDir { get; private set; } = 1;
@@ -35,8 +35,9 @@ public class Entity : MonoBehaviour
     protected virtual void Start()
     {
         anim = GetComponentInChildren<Animator>();
+        sr = GetComponentInChildren<SpriteRenderer>();
+        fx = GetComponent<EntityFX>();
         rb = GetComponent<Rigidbody2D>();
-        fx = GetComponentInChildren<EntityFX>();
     }
 
     protected virtual void Update()
@@ -106,4 +107,16 @@ public class Entity : MonoBehaviour
         Gizmos.DrawWireSphere(attackCheck.position, attackCheckRadius);
     }
     #endregion
+
+    public void MakeTransprent(bool _transprent)
+    {
+        if (_transprent)
+        {
+            sr.color = Color.clear;
+        }
+        else
+        {
+            sr.color = Color.white;
+        }
+    }
 }

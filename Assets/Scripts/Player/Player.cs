@@ -75,6 +75,9 @@ public class Player : Entity
         base.Update();
         stateMachine.currentState.Update();
         CheckForDashInput();
+        if (Input.GetKeyDown(KeyCode.F)){
+            skill.crystal.canUseSkill();
+        }
 
     }
 
@@ -83,6 +86,8 @@ public class Player : Entity
     {
         sword = _newSword;  
     }
+
+    
     //todo 对象池优化
     public void CatchTheSword()
     {
