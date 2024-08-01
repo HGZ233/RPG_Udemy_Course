@@ -19,8 +19,8 @@ public class Player : Entity
     public float dashDurasion;
     public float dashDir { get; private set; }
 
-    public SkillManage skill {  get; private set; }
-    public GameObject sword {  get; private set; }  
+    public SkillManage skill { get; private set; }
+    public GameObject sword { get; private set; }
 
     #region States
     public PlayerStateMachine stateMachine { get; private set; }
@@ -39,6 +39,7 @@ public class Player : Entity
     public PlayerCatchSwordState catchSwordState { get; private set; }
     public PlayerThrowSwordState throwSwordState { get; private set; }
     public PlayerBlackholeState blackholeState { get; private set; }
+    public PlayerDeadState dieState { get; private set; }
     #endregion
 
 
@@ -59,6 +60,7 @@ public class Player : Entity
         catchSwordState = new PlayerCatchSwordState(this, stateMachine, "CatchSword");
         throwSwordState = new PlayerThrowSwordState(this, stateMachine, "isThrowSword");
         blackholeState = new PlayerBlackholeState(this, stateMachine, "Jump");
+        dieState = new PlayerDeadState(this, stateMachine, "Die");
 
     }
 
@@ -75,7 +77,8 @@ public class Player : Entity
         base.Update();
         stateMachine.currentState.Update();
         CheckForDashInput();
-        if (Input.GetKeyDown(KeyCode.F)){
+        if (Input.GetKeyDown(KeyCode.F))
+        {
             skill.crystal.canUseSkill();
         }
 
@@ -84,15 +87,15 @@ public class Player : Entity
 
     public void AssignNewSword(GameObject _newSword)
     {
-        sword = _newSword;  
+        sword = _newSword;
     }
 
-    
+
     //todo 对象池优化
     public void CatchTheSword()
     {
         stateMachine.ChangeState(catchSwordState);
-        Destroy(sword); 
+        Destroy(sword);
     }
     private void CheckForDashInput()
     {
@@ -121,7 +124,11 @@ public class Player : Entity
 
     public void AnimationTrigger() => stateMachine.currentState.AnimationFinishTrigger();
 
-
+    public override void Die()
+    {
+        base.Die();
+        stateMachine.ChangeState(dieState);
+    }
 
 
 

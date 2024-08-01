@@ -108,7 +108,7 @@ SpriteRenderer:
   m_SortingLayer: 3
   m_SortingOrder: -1
   m_Sprite: {fileID: 1270459817, guid: ae72133dacba6ec4eb33ecde48f50e56, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.71898663, g: 0.4764151, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -151,6 +151,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4272eb09bba38364b8e9d4a03e1cdbfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  colorLoosingSpeed: 1.5
   attackCheck: {fileID: 7854621038475265091}
-  attackCheckRadius: 0.8

@@ -18,7 +18,8 @@ public class PlayerAinmationTriggers : MonoBehaviour
         {
             if (hit.GetComponent<Enemy>() != null)
             {
-                hit.GetComponent<Enemy>().Damage();
+                EnemyStats state = hit.GetComponent<EnemyStats>();
+                player.stats.DoDamage(state);            
             }
         }
     }

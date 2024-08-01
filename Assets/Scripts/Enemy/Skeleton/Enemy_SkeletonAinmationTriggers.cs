@@ -18,7 +18,8 @@ public class Enemy_SkeletonAinmationTriggers : MonoBehaviour
         {
             if (hit.GetComponent<Player>() != null)
             {
-                hit.GetComponent<Player>().Damage();
+                PlayerStats stats = hit.GetComponent<PlayerStats>();
+                enemy.stats.DoDamage(stats);
             }
         }
     }

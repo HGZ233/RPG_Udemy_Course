@@ -59,6 +59,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Scripts\Skill\Controller\BlackholeController.cs" />
+    <Compile Include="Assets\Scripts\Skill\Crystal\CrystalSkill.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonIdleState.cs" />
     <Compile Include="Assets\Scripts\Entity.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonGroundState.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Assets\Scripts\Skill\Controller\SwordSkillController.cs" />
     <Compile Include="Assets\Scripts\Enemy\EnemyState.cs" />
     <Compile Include="Assets\Scripts\Skill\Blackhole\BlackholeSkill.cs" />
+    <Compile Include="Assets\Scripts\Skill\Controller\CrystalSkillController.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonStunnedState.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerPrimaryAttackState.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonAttackState.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerDashState.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonBattleState.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerCounterAttackState.cs" />
+    <Compile Include="Assets\Scripts\Stat.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerWallJumpState.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerIdleState.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerAimSwordState.cs" />
@@ -92,6 +95,7 @@
     <Compile Include="Assets\Scripts\Player\PlayerMoveState.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerJumpState.cs" />
     <Compile Include="Assets\Scripts\Skill\SkillManage.cs" />
+    <Compile Include="Assets\Scripts\CharacterStats.cs" />
     <Compile Include="Assets\Scripts\Skill\Controller\BlackholeHotKeyController.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\Enemy_SkeletonAinmationTriggers.cs" />
     <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonMoveState.cs" />
@@ -101,8 +105,10 @@
     <Compile Include="Assets\Scripts\Skill\Skill.cs" />
     <Compile Include="Assets\Scripts\Player\PlayerManage.cs" />
     <Compile Include="Assets\Scripts\Shaders\EntityFX.cs" />
-    <Compile Include="Assets\Scripts\Skill\Crystal\CrystalSkill.cs" />
-    <Compile Include="Assets\Scripts\Skill\Controller\CrystalSkillController.cs" />
+    <Compile Include="Assets\Scripts\PlayerStats.cs" />
+    <Compile Include="Assets\Scripts\EnemyStats.cs" />
+    <Compile Include="Assets\Scripts\Player\PlayerDeadState.cs" />
+    <Compile Include="Assets\Scripts\Enemy\Skeleton\SkeletonDeadState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\TextMesh Pro\Shaders\TMPro.cginc" />
