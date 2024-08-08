@@ -19,7 +19,9 @@ public class PlayerAinmationTriggers : MonoBehaviour
             if (hit.GetComponent<Enemy>() != null)
             {
                 EnemyStats state = hit.GetComponent<EnemyStats>();
-                player.stats.DoDamage(state);            
+                player.stats.DoDamage(state);
+
+                Inventory.instance.GetEquipment(EquipmentType.Weapon).ExecuteItemEffect();
             }
         }
     }

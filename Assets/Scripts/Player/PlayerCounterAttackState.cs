@@ -17,6 +17,7 @@ public class PlayerCounterAttackState : PlayerState
         stateTimer = player.counterAttackDuration;
         player.anim.SetBool("SuccessCounterAttack", false);
       
+      
 
     }
 

@@ -8,15 +8,20 @@ public class Player : Entity
 {
     [Header("Attack details")]
     public Vector2[] attackMovement;
-    public float counterAttackDuration = 0.2f;
+    public float counterAttackDuration;
     public bool isBusy { get; private set; }
     [Header("Move Info")]
     public float moveSpeed;
     public float jumpForce;
     public float swordReturnImpact;
+    private float defaultMoveSpeed;
+    private float defaultJumpForce;
     [Header("Dash Info")]
     public float dashSpeed;
     public float dashDurasion;
+    private float defaultDashSpeed;
+    //是否正在冲刺 用来解决冲刺中格挡问题
+    public bool dashing;
     public float dashDir { get; private set; }
 
     public SkillManage skill { get; private set; }
@@ -69,6 +74,9 @@ public class Player : Entity
         base.Start();
         skill = SkillManage.instance;
         stateMachine.Initialized(idleState);
+        defaultMoveSpeed = moveSpeed;
+        defaultJumpForce = jumpForce;
+        defaultDashSpeed = dashSpeed;
 
     }
 
@@ -77,13 +85,29 @@ public class Player : Entity
         base.Update();
         stateMachine.currentState.Update();
         CheckForDashInput();
+        CheckForCounterAttackInput();
         if (Input.GetKeyDown(KeyCode.F))
         {
             skill.crystal.canUseSkill();
         }
 
-    }
 
+    }
+    public override void SlowEntityBy(float _slowPerecentage, float slowDuration)
+    {
+        moveSpeed = moveSpeed * (1 - _slowPerecentage);
+        dashSpeed = dashSpeed * (1 - _slowPerecentage);
+        jumpForce = jumpForce * (1 - _slowPerecentage);
+        anim.speed = anim.speed * (1 - _slowPerecentage);
+        Invoke("ReturnDefaultSpeed", slowDuration);
+    }
+    public override void ReturnDefaultSpeed()
+    {
+        base.ReturnDefaultSpeed();
+        moveSpeed = defaultMoveSpeed;
+        dashSpeed = defaultDashSpeed;
+        jumpForce = defaultJumpForce;
+    }
 
     public void AssignNewSword(GameObject _newSword)
     {
@@ -101,6 +125,7 @@ public class Player : Entity
     {
         if (Input.GetKeyDown(KeyCode.LeftShift) && SkillManage.instance.dash.canUseSkill())
         {
+            dashing = true;
             //优化闪避功能，防止出现先按闪避而导致无法控制闪避方向的问题
             dashDir = Input.GetAxisRaw("Horizontal");
             if (dashDir == 0)
@@ -108,6 +133,24 @@ public class Player : Entity
                 dashDir = facingDir;
             }
             stateMachine.ChangeState(dashState);
+
+        }
+        //滑墙状态不允许冲刺
+        if (IsWallDetected())
+        {
+            return;
+        }
+    }
+    private void CheckForCounterAttackInput()
+    {
+        //跳跃时禁止格挡
+        if (rb.velocity.y != 0 || dashing)
+        {
+            return;
+        }
+        if (Input.GetKeyDown(KeyCode.Q) && SkillManage.instance.counter.canUseSkill())
+        {
+            stateMachine.ChangeState(counterAttackState);
         }
         //滑墙状态不允许冲刺
         if (IsWallDetected())

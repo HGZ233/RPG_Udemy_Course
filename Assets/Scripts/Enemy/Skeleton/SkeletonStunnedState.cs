@@ -1,7 +1,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+/// <summary>
+/// µ¯·´±»»÷
+/// </summary>
 public class SkeletonStunnedState : EnemyState
 {
     private Enemy_Skeleton enemy;
@@ -21,7 +23,7 @@ public class SkeletonStunnedState : EnemyState
     public override void Exit()
     {
         base.Exit();
-        enemy.fx.Invoke("CancelRedBlink", 0);
+        enemy.fx.Invoke("CancelColorBlink", 0);
     }
 
     public override void Update()

@@ -13,7 +13,7 @@ public class PlayerDashState : PlayerState
         base.Enter();
         stateTimer = player.dashDurasion;
         SkillManage.instance.clone.CreateCloneOnDushStart();
-       // SkillManage.instance.clone.CreateClone(player.transform,Vector3.zero);
+        // SkillManage.instance.clone.CreateClone(player.transform,Vector3.zero);
 
     }
 
@@ -22,6 +22,7 @@ public class PlayerDashState : PlayerState
         base.Exit();
         SkillManage.instance.clone.CreateCloneOnDushOver();
         player.SetVelocity(0, rb.velocity.y);
+        player.dashing = false;
     }
 
     public override void Update()

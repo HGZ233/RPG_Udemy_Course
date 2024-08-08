@@ -24,8 +24,8 @@ public class Enemy : Entity
     public float attackColdDown;
     [HideInInspector] public float lastTimeAttacked;
 
-    public EnemyStateMachine stateMachine {  get; private set; }
-    public string lastAnimBoolName {  get; private set; }
+    public EnemyStateMachine stateMachine { get; private set; }
+    public string lastAnimBoolName { get; private set; }
 
     protected override void Awake()
     {
@@ -44,7 +44,17 @@ public class Enemy : Entity
         base.Update();
         stateMachine.currentState.Update();
     }
-
+    public override void SlowEntityBy(float _slowPerecentage, float slowDuration)
+    {
+        moveSpeed = moveSpeed * (1 - _slowPerecentage);
+        anim.speed = anim.speed * (1 - _slowPerecentage);
+        Invoke("ReturnDefaultSpeed", slowDuration);
+    }
+    public override void ReturnDefaultSpeed()
+    {
+        base.ReturnDefaultSpeed();
+        moveSpeed = defaultMoveSpeed;
+    }
     public virtual void AssignLastAnimName(string _animBoolName)
     {
         lastAnimBoolName = _animBoolName;
@@ -83,7 +93,10 @@ public class Enemy : Entity
 
     }
     #endregion
-
+    /// <summary>
+    /// ·´»÷ÌáÊ¾
+    /// </summary>
+    /// <returns></returns>
     public virtual bool CanBeStunned()
     {
         if (canBeStuned)

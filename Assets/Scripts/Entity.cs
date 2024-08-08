@@ -30,6 +30,8 @@ public class Entity : MonoBehaviour
     public int facingDir { get; private set; } = 1;
     protected bool facingRight = true;
 
+    public System.Action onFlipped;
+
     protected virtual void Awake()
     {
 
@@ -48,12 +50,21 @@ public class Entity : MonoBehaviour
     {
 
     }
-    public virtual void DamageEffect()
+    /// <summary>
+    /// ±»»÷Ó²Ö±
+    /// </summary>
+    public virtual void DamageImpact() => StartCoroutine("HitKnockback");
+
+
+    public virtual void SlowEntityBy(float _slowPerecentage, float slowDuration)
     {
-        fx.StartCoroutine("FlashFX");
-        StartCoroutine("HitKnockback");
+
     }
 
+    public virtual void ReturnDefaultSpeed()
+    {
+        anim.speed = 1;
+    }
     protected virtual IEnumerator HitKnockback()
     {
         isKnocked = true;
@@ -68,6 +79,8 @@ public class Entity : MonoBehaviour
         facingDir = facingDir * -1;
         facingRight = !facingRight;
         transform.Rotate(0, 180, 0);
+        onFlipped?.Invoke();
+
     }
 
     public void FlipController(float _x)
@@ -112,17 +125,7 @@ public class Entity : MonoBehaviour
     }
     #endregion
 
-    public void MakeTransprent(bool _transprent)
-    {
-        if (_transprent)
-        {
-            sr.color = Color.clear;
-        }
-        else
-        {
-            sr.color = Color.white;
-        }
-    }
+
     public virtual void Die()
     {
 
